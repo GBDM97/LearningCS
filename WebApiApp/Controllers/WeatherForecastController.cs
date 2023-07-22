@@ -1,4 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+
 
 namespace WebApiApp.Controllers;
 
@@ -28,5 +32,38 @@ public class WeatherForecastController : ControllerBase
             Summary = Summaries[Random.Shared.Next(Summaries.Length)]
         })
         .ToArray();
+    }
+
+    [HttpGet("db")]
+
+    public string GetFromDB()
+    {
+        string connStr = "server=localhost;user=root;database=test;port=3307;password=example";
+        MySqlConnection conn = new MySqlConnection(connStr);
+        conn.Open();
+        string query = "SELECT * from BOOKS";
+        string id = "";
+        try
+        {
+            using (MySqlCommand command = new MySqlCommand(query, conn))
+            {
+                using (MySqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        id = reader.GetString(1);
+                        return id;
+                    }
+                }
+            }
+        }
+        catch (MySqlException ex)
+        {
+            // Handle specific MySQL exceptions here
+            return "Database Error: " + ex.Message;
+        }
+
+        return id.ToString();
+
     }
 }
